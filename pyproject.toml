@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "busse-document-downloader"
+version = "0.1.0"
+description = ""
+authors = ["jlmodell <modell.jeff@me.com>"]
+readme = "README.md"
+packages = [{include = "busse_document_downloader"}]
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+pyinstaller = "^5.13.0"
+pandas = "^2.0.3"
+openpyxl = "^3.1.2"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.7.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
