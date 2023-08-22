@@ -52,6 +52,7 @@ catalog = {
 def read_in_dmrs():
     global catalog, root_path
     file = os.path.join(root_path, "dmr.xlsx")
+    assert os.path.exists(file), f"DMR file `{file}` does not exist, log into the network and try again."
     
     df = pd.read_excel(file, sheet_name="Sheet1")    
     df = df.fillna("")    
