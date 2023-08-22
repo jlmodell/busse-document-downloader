@@ -1,5 +1,7 @@
 FROM tiangolo/uvicorn-gunicorn-fastapi:latest
 
+WORKDIR /
+
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
