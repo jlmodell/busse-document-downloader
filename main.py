@@ -50,8 +50,8 @@ catalog = {
 }
 
 def read_in_dmrs():
-    global catalog
-    file = os.path.join(root_path, "DMR.xlsx")
+    global catalog, root_path
+    file = os.path.join(root_path, "dmr.xlsx")
     
     df = pd.read_excel(file, sheet_name="Sheet1")    
     df = df.fillna("")    
