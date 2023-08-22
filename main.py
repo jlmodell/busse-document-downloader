@@ -15,7 +15,7 @@ from fastapi.templating import Jinja2Templates
 # root_path = os.path.join(r'//128.1.1.64', 'Document Control')
 # if not os.path.exists(root_path):
 #     root_path = os.path.join(r'//busse')
-root_path = os.path.join('./documents')
+root_path = os.path.join(r'documents')
 assert os.path.exists(root_path), f"Root path `{root_path}` does not exist, log into the network and try again."
 
 root_dir = os.path.join(root_path, 'Document Control @ Busse', 'PDF Controlled Documents')
