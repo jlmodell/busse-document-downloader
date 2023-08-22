@@ -3,10 +3,19 @@ from glob import glob
 import sys
 import pandas as pd
 from datetime import datetime
+from pathlib import Path
 
-root_path = os.path.join(r'//128.1.1.64', 'Document Control')
-if not os.path.exists(root_path):
-    root_path = os.path.join(r'//busse')
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from fastapi import BackgroundTasks, FastAPI, Form, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.templating import Jinja2Templates
+
+# root_path = os.path.join(r'//128.1.1.64', 'Document Control')
+# if not os.path.exists(root_path):
+#     root_path = os.path.join(r'//busse')
+root_path = os.path.join('documents')
 assert os.path.exists(root_path), f"Root path `{root_path}` does not exist, log into the network and try again."
 
 root_dir = os.path.join(root_path, 'Document Control @ Busse', 'PDF Controlled Documents')
@@ -83,6 +92,8 @@ def read_in_dmrs():
     print()
     print("Catalog dictionary created. with", len(catalog), "entries")
     print()
+
+    return catalog
     
 read_in_dmrs()
 
@@ -130,9 +141,9 @@ def search_for_files(catalog_input: str) -> list:
         if key == "qas":
             pathname = os.path.join(root_dir,f'*{key.upper()}*', '**', f'*{file}*.pdf')
         if key in ["shipper_label", "dispenser_label", "content_label", "print_mat"] :
-            pathname = os.path.join(root_dir,'*DMR*', '**', f'*{catalog_input}', f'*{file}*.pdf')
+            pathname = os.path.join(root_dir,'*DMR*', '**', f'{catalog_input}', f'*{file}*.pdf')
         if key == "dmr":
-            pathname = os.path.join(root_dir,'*DMR*', '**', f'*{catalog_input}', f'*{file}*DMR.pdf')
+            pathname = os.path.join(root_dir,'*DMR*', '**', f'{catalog_input}', f'*{file}*DMR.pdf')
 
         found = glob(pathname)
 
@@ -188,7 +199,7 @@ def search_for_files(catalog_input: str) -> list:
     
     files = list(set(files))
 
-    with open(f'{catalog_input}_list_of_files__{datetime.now():%m%d%Y%H%M%S}.txt', 'w') as f:
+    with open(f'archive/{catalog_input}_list_of_files__{datetime.now():%m%d%Y%H%M%S}.txt', 'w') as f:
         f.writelines([f'{x}\n' for x in files])
 
     return files
@@ -196,20 +207,126 @@ def search_for_files(catalog_input: str) -> list:
 def zip_files_for_download(catalog: str, files: list):
     import zipfile    
     
-    with zipfile.ZipFile(catalog, 'w') as zipf:
+    with zipfile.ZipFile(f'./archive/{catalog}.zip', 'w') as zipf:
         for file in files:
             zipf.write(file)    
     
+app = FastAPI()
 
-def main():
-    catalog_input = user_catalog_input()
-    files = search_for_files(catalog_input)
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+templates = Jinja2Templates(directory="templates")
+
+origins = [
+    "http://localhost",
+    "http://localhost:8000",
+    "https://rebate_tracing_tool.bhd-ny.com/",
+    "http://128.1.5.76:8188/",
+    "http://128.1.5.126:8188/",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    global catalog
+
+    title = "Busse File Gatherer"
+
+    context = {
+        "request": request,
+        "title": title,        
+    }
+
+    return templates.TemplateResponse("main.html", context)
+
+@app.get("/refresh", response_class=HTMLResponse)
+async def refresh_dmrs(request: Request):
+    global catalog
+
+    catalog = {}
+
+    read_in_dmrs()
+
+    title = "Busse File Gatherer"
+
+    context = {
+        "request": request,
+        "title": title,        
+    }
+
+    return templates.TemplateResponse("main.html", context)
+
+@app.post("/search", response_class=HTMLResponse)
+async def find_in_catalog(request: Request, catalog_nbr: str = Form(...)):
+    global catalog    
+
+    context = {
+        "request": request,
+    }
     
-    zip_files_for_download(f'{catalog_input}.zip', files)
+    context["details"] = {
+        "mss": "None",
+        "ink": "None",
+        "print_mat": "None",
+        "mi": "None",
+        "qas": "None",
+        "pss": "None",
+        "shipper_label": "None",
+        "dispenser_label": "None",
+        "content_label": "None",
+        "dmr": "None",
+        "special_instructions": "None"
+    }
+
+    context["catalog_nbr"] = catalog_nbr
+
+    details = catalog.get(catalog_nbr, None)    
+    if details is None:
+        return templates.TemplateResponse("fragment/not_found.html", context)
+
+    context["details"] = details
+
+    return templates.TemplateResponse("fragment/results.html", context)
+
+@app.post("/gather", response_class=HTMLResponse)
+async def gather_files(
+    request: Request,
+   catalog_nbr: str = Form(...),
+):
+    context = {
+        "request": request,
+        "catalog_nbr": catalog_nbr,
+    }
+
+    files = search_for_files(catalog_nbr)
+    zip_files_for_download(catalog_nbr, files)
+
+    context["files"] = files
+
+    return templates.TemplateResponse("fragment/gathered_files.html", context)
+
+
+@app.get("/download", response_class=FileResponse)
+async def download_file(catalog_nbr: str):
+    
+    file_path = Path(f"./archive/{catalog_nbr}.zip")
+
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="File not found")
+
+    return FileResponse(file_path, filename=f"{catalog_nbr}.zip")
+
 
 if __name__ == "__main__":
-    print('base path ->', root_dir, '\n')
+    import uvicorn
 
-    main()
+    uvicorn.run("main:app", host="0.0.0.0", port=8100, reload=True)
 
     

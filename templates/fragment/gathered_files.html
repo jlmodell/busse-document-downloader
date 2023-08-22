@@ -1,0 +1,24 @@
+<div>
+  <h1>{{ catalog_nbr }}</h1>
+  <hr />
+  <input
+    name="catalog_nbr"
+    id="catalog_nbr"
+    type="hidden"
+    value="{{ catalog_nbr }}"
+  />
+  <ul>
+    {% for file in files %}
+    <li>{{ file }}</li>
+    {% endfor %}
+  </ul>
+
+  <hr />
+  <div class="grid">
+    <h2 style="text-align: center">
+      <a href="/download?catalog_nbr={{ catalog_nbr }}">Download</a>
+    </h2>
+    <h2 style="text-align: center"><a href="/">Return to Home</a></h2>
+  </div>
+  <hr />
+</div>

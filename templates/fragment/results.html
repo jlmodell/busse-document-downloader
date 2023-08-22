@@ -1,0 +1,25 @@
+<form id="form" class="" hx-trigger="submit" hx-post="/gather">
+  <h1>{{catalog_nbr}}</h1>
+  <hr />
+  <input
+    name="catalog_nbr"
+    id="catalog_nbr"
+    type="hidden"
+    value="{{ catalog_nbr }}"
+  />
+  {% for k,v in details.items() %}
+  <label
+    >{{ k }}<input disabled="true" type="text" name="{{ k }}" value="{{ v }}"
+  /></label>
+  {% endfor %}
+
+  <hr />
+  <button type="submit">
+    Gather Files
+    <img
+      class="htmx-indicator"
+      src="{{ url_for('static', path='/images/spinning-circles.svg') }}"
+    />
+  </button>
+  <hr />
+</form>
