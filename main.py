@@ -218,6 +218,10 @@ def zip_files_for_download(catalog: str, files: list):
     
 app = FastAPI()
 
+static = os.path.join(os.getcwd(),"static")
+print(static)
+print(os.listdir(static))
+
 app.mount("/static", StaticFiles(directory=os.path.join("static")), name="static")
 
 templates = Jinja2Templates(directory=os.path.join("templates"))
