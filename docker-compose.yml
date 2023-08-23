@@ -9,6 +9,6 @@ services:
     command: "uvicorn --host '0.0.0.0' --port 8722 main:app"
     restart: unless-stopped
     volumes:
-      - ./documents:/documents
+      - /mnt/busse/documents:/documents
       - ./archive:/archive
       - ./logs:/logs
