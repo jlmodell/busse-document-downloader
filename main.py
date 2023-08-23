@@ -8,33 +8,24 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 import re
-import logging
-import builtins
+# import logging
+# import builtins
 
 # write logs to debug.log
-logging.basicConfig(filename=os.path.join(os.getcwd(), "logs", "debug.log"), level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# logging.basicConfig(filename=os.path.join(os.getcwd(), "logs", "debug.log"), level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 from cli import read_in_dmrs, search_for_files, zip_files_for_download, catalog
 
-def custom_print(*args, **kwargs):
-    message = ' '.join(str(arg) for arg in args)
-    logging.info(message)
+# def custom_print(*args, **kwargs):
+#     message = ' '.join(str(arg) for arg in args)
+#     logging.info(message)
 
-# Replace the built-in print with the custom print
-builtins.print = custom_print
-
+# builtins.print = custom_print
 
 if not os.path.exists(os.path.join(os.getcwd(), "logs", "today")):
     os.makedirs(os.path.join(os.getcwd(), "logs", "today"))
 
-# print("/", os.listdir(os.getcwd()))
-# print("/documents", os.listdir(os.path.join(os.getcwd(), "documents")))
-
-# The `read_in_dmrs()` function is not defined in the provided code. It is likely defined in another
-# part of the code or in a separate module. Without the definition of the function, it is not possible
-# to determine what it does.
 read_in_dmrs()
-
 
 app = FastAPI()
 
