@@ -339,9 +339,9 @@ async def gather_files(
 
     # import urllib.parse
 
-    cleaned_files = [file.replace("/documents/","//busse/") for file in files]
+    cleaned_files = [os.path.basename(file) for file in files]
 
-    print(cleaned_files)
+    # print(cleaned_files)
         
     context["files"] = cleaned_files    
 
