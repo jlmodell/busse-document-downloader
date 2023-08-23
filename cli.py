@@ -132,6 +132,8 @@ def search_for_files(catalog_input: str) -> list:
 
         # try as is
         pathname = os.path.join(root_dir,f'*{key.upper()}*', f'*{file}.pdf')
+        if key == "mi":
+            pathname = os.path.join(root_dir,f'*{key.upper()}*', f'*{file}*.pdf')
         if key == "qas":
             pathname = os.path.join(root_dir,f'*{key.upper()}*', '**', f'*{file}*.pdf')
         if key in ["shipper_label", "dispenser_label", "content_label", "print_mat"] :
@@ -161,7 +163,9 @@ def search_for_files(catalog_input: str) -> list:
             except:
                 continue
 
-            pathname = os.path.join(root_dir,f'*{key.upper()}*', f'*{file}*.pdf')        
+            pathname = os.path.join(root_dir,f'*{key.upper()}*', f'*{file}.pdf')
+            if key == "mi":
+                pathname = os.path.join(root_dir,f'*{key.upper()}*', f'*{file}*.pdf')
             if key == "qas":
                 pathname = os.path.join(root_dir,f'*{key.upper()}*', '**', f'*{file}*.pdf')
             if key in ["shipper_label", "dispenser_label", "content_label", "print_mat"] :
