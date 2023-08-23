@@ -18,6 +18,11 @@ assert os.path.exists(root_path), f"Root path `{root_path}` does not exist, log 
 
 root_dir = os.path.join(root_path, 'Document Control @ Busse', 'PDF Controlled Documents')
 
+def insensitive_glob(pattern):
+    def either(c):
+        return '[%s%s]' % (c.lower(), c.upper()) if c.isalpha() else c
+    return glob(''.join(map(either, pattern)))
+
 catalog = {
     # "6053": 
     #     {
@@ -134,7 +139,7 @@ def search_for_files(catalog_input: str) -> list:
         if key == "dmr":
             pathname = os.path.join(root_dir,'*DMR*', '**', f'{catalog_input}', f'*{file}*DMR.pdf')
 
-        found = glob(pathname)
+        found = insensitive_glob(pathname)
 
         if found:
             if key in ["mss","mi", "qas"] and len(found) > 1:
@@ -164,7 +169,7 @@ def search_for_files(catalog_input: str) -> list:
             if key == "dmr":
                 pathname = os.path.join(root_dir,'*DMR*', '**', f'*{catalog_input}', f'*{file}*DMR.pdf')
 
-            found = glob(pathname)
+            found = insensitive_glob(pathname)
 
             if found:
                 if key in ["mss","mi", "qas"] and len(found) > 1:
@@ -183,7 +188,7 @@ def search_for_files(catalog_input: str) -> list:
 
     # do a final sweep for all files in the dmr folder
     final_sweep = os.path.join(root_dir,'*DMR*', '**', f'{catalog_input}', f'*.pdf')
-    found = glob(final_sweep)
+    found = insensitive_glob(final_sweep)
     if found:
         files = files + found
     
