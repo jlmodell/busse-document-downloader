@@ -339,7 +339,7 @@ async def gather_files(
 
     import urllib.parse
 
-    cleaned_files = [urllib.parse.quote(file) for file in files]
+    cleaned_files = [urllib.parse.quote(file.replace("/documents/","//busse/")) for file in files]
 
     print(cleaned_files)
         
