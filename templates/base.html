@@ -16,6 +16,20 @@
   <body class="">
     <main class="container">{% block content %} {% endblock %}</main>
 
-    {% block javascript %} {% endblock %}
+    <script type="text/javascript">
+      function updateInputValue(key) {
+        let inputValue = key;
+
+        console.log(key, inputValue);
+
+        let inputField = document.getElementById("catalog_nbr");
+
+        inputField.value = inputValue;
+
+        let searchButton = document.getElementById("search");
+
+        searchButton.click();
+      }
+    </script>
   </body>
 </html>

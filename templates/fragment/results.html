@@ -1,25 +1,42 @@
 <form id="form" class="" hx-trigger="submit" hx-post="/gather">
   <h1>{{catalog_nbr}}</h1>
   <hr />
+
+  <br />
+  <div class="grid">
+    <h2 style="text-align: center">
+      <button type="submit" style="font-weight: 500">
+        Gather Files
+        <img
+          class="htmx-indicator"
+          src="{{ url_for('static', path='/images/spinning-circles.svg') }}"
+        />
+      </button>
+    </h2>
+    <h2 style="text-align: center">
+      <a href="/"> Return to Home </a>
+    </h2>
+  </div>
+  <br />
+
   <input
     name="catalog_nbr"
     id="catalog_nbr"
     type="hidden"
     value="{{ catalog_nbr }}"
   />
+
   {% for k,v in details.items() %}
-  <label
-    >{{ k }}<input disabled="true" type="text" name="{{ k }}" value="{{ v }}"
+  <label style="text-transform: uppercase"
+    >{{ k }}<input
+      style="text-transform: uppercase"
+      disabled="true"
+      type="text"
+      name="{{ k }}"
+      value="{{ v }}"
   /></label>
   {% endfor %}
 
-  <hr />
-  <button type="submit">
-    Gather Files
-    <img
-      class="htmx-indicator"
-      src="{{ url_for('static', path='/images/spinning-circles.svg') }}"
-    />
-  </button>
+  <br />
   <hr />
 </form>

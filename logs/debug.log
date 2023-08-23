@@ -1,0 +1,25 @@
+2023-08-23 17:26:40,179 - INFO - /documents []
+2023-08-23 17:26:40,180 - INFO - dmr.xlsx exists False
+2023-08-23 17:26:42,298 - INFO - /documents []
+2023-08-23 17:26:42,298 - INFO - dmr.xlsx exists False
+2023-08-23 17:26:44,530 - INFO - /documents []
+2023-08-23 17:26:44,530 - INFO - dmr.xlsx exists False
+2023-08-23 17:26:47,174 - INFO - /documents []
+2023-08-23 17:26:47,174 - INFO - dmr.xlsx exists False
+2023-08-23 17:27:18,871 - INFO - /documents []
+2023-08-23 17:27:18,871 - INFO - dmr.xlsx exists False
+2023-08-23 17:27:21,259 - INFO - /documents []
+2023-08-23 17:27:21,259 - INFO - dmr.xlsx exists False
+2023-08-23 17:27:24,681 - INFO - /documents []
+2023-08-23 17:27:24,682 - INFO - dmr.xlsx exists False
+2023-08-23 17:27:27,105 - INFO - /documents []
+2023-08-23 17:27:27,105 - INFO - dmr.xlsx exists False
+2023-08-23 17:27:29,747 - INFO - /documents []
+2023-08-23 17:27:29,747 - INFO - dmr.xlsx exists False
+2023-08-23 17:27:32,857 - INFO - /documents []
+2023-08-23 17:27:32,858 - INFO - dmr.xlsx exists False
+2023-08-23 17:28:59,678 - INFO - /documents ['dmr.xlsx']
+2023-08-23 17:28:59,679 - INFO - dmr.xlsx exists True
+2023-08-23 17:29:00,048 - INFO - 
+2023-08-23 17:29:00,048 - INFO - Catalog dictionary created. with 918 entries
+2023-08-23 17:29:00,048 - INFO - 

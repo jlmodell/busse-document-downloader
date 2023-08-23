@@ -1,24 +1,51 @@
 <div>
   <h1>{{ catalog_nbr }}</h1>
   <hr />
+
+  <br />
+  <div class="grid">
+    <h2 style="text-align: center">
+      <a href="/download?catalog_nbr={{ catalog_nbr }}">Download</a>
+    </h2>
+    <h2 style="text-align: center">
+      <a href="/">Return to Home</a>
+    </h2>
+  </div>
+  <br />
+
   <input
     name="catalog_nbr"
     id="catalog_nbr"
     type="hidden"
     value="{{ catalog_nbr }}"
   />
+  {% if details['special_instructions'] %}
+  <br />
+  <h2>Special Instructions</h2>
+  <p>{{ details['special_instructions'] }}</p>
+  <br />
+  <hr />
+  {% else %}
+  <hr />
+  {% endif %}
+
   <ul>
     {% for file in files %}
-    <li>{{ file }}</li>
+    <li><a href="{{ file }}" target="_blank">{{ file }}</a></li>
     {% endfor %}
   </ul>
 
-  <hr />
-  <div class="grid">
-    <h2 style="text-align: center">
-      <a href="/download?catalog_nbr={{ catalog_nbr }}">Download</a>
-    </h2>
-    <h2 style="text-align: center"><a href="/">Return to Home</a></h2>
-  </div>
+  {% for k,v in details.items() %}
+  <label style="text-transform: uppercase"
+    >{{ k }}<input
+      style="text-transform: uppercase"
+      disabled="true"
+      type="text"
+      name="{{ k }}"
+      value="{{ v }}"
+  /></label>
+  {% endfor %}
+
+  <br />
   <hr />
 </div>

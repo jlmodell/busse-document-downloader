@@ -2,5 +2,8 @@ build
 dist
 /archive/*.txt
 /**/*.zip
-/**/*.xls*
+/*.xls*
 /**/*.spec
+*.pyc
+*.pyc
+__pycache__/main.cpython-310.pyc

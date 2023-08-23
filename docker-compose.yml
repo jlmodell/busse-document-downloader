@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  rebate_tracing_tool:
+  app:
     container_name: docs
     build: .
     ports:
@@ -9,5 +9,6 @@ services:
     command: "uvicorn --host '0.0.0.0' --port 8722 main:app"
     restart: unless-stopped
     volumes:
-      - /mnt/busse/documents:/documents
+      - ./documents:/documents
       - ./archive:/archive
+      - ./logs:/logs
