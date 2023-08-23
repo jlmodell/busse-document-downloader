@@ -218,9 +218,9 @@ def zip_files_for_download(catalog: str, files: list):
     
 app = FastAPI()
 
-app.mount("/static", StaticFiles(directory=os.path.join(os.getcwd(), "static")), name="static")
+app.mount("/static", StaticFiles(directory=os.path.join("static")), name="static")
 
-templates = Jinja2Templates(directory=os.path.join(os.getcwd(), "templates"))
+templates = Jinja2Templates(directory=os.path.join("templates"))
 
 origins = [
     "http://localhost",
