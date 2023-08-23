@@ -15,7 +15,7 @@ from fastapi.templating import Jinja2Templates
 # root_path = os.path.join(r'//128.1.1.64', 'Document Control')
 # if not os.path.exists(root_path):
 #     root_path = os.path.join(r'//busse')
-root_path = os.path.join(r'./documents')
+root_path = os.path.join(os.path.join(os.getcwd(), "documents"))
 assert os.path.exists(root_path), f"Root path `{root_path}` does not exist, log into the network and try again."
 
 root_dir = os.path.join(root_path, 'Document Control @ Busse', 'PDF Controlled Documents')
@@ -198,25 +198,27 @@ def search_for_files(catalog_input: str) -> list:
     if found:
         files = files + found
     
-    files = list(set(files))
+    list_of_files = os.path.join(os.getcwd(), "archive", f'{catalog_input}_list_of_files__{datetime.now():%m%d%Y%H%M%S}.txt')
 
-    with open(f'archive/{catalog_input}_list_of_files__{datetime.now():%m%d%Y%H%M%S}.txt', 'w') as f:
+    with open(list_of_files, 'w') as f:
         f.writelines([f'{x}\n' for x in files])
+
+    files = list(set(files))    
 
     return files
 
 def zip_files_for_download(catalog: str, files: list):
     import zipfile    
     
-    with zipfile.ZipFile(f'archive/{catalog}.zip', 'w') as zipf:
+    with zipfile.ZipFile(os.path.join(os.getcwd(), "archive", f'{catalog}.zip'), 'w') as zipf:
         for file in files:
             zipf.write(file)    
     
 app = FastAPI()
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory=os.path.join(os.getcwd(), "static")), name="static")
 
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory=os.path.join(os.getcwd(), "templates"))
 
 origins = [
     "http://localhost",
@@ -317,12 +319,12 @@ async def gather_files(
 @app.get("/download", response_class=FileResponse)
 async def download_file(catalog_nbr: str):
     
-    file_path = Path(f"./archive/{catalog_nbr}.zip")
+    file_path = Path(os.path.join(os.getcwd(), "archive", f"{catalog_nbr}.zip"))
 
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="File not found")
 
-    return FileResponse(file_path, filename=f"{catalog_nbr}.zip")
+    return FileResponse(file_path, filename=f"{catalog_nbr}__{datetime.now():%m-%d-%Y_%H%M%S}__.zip")
 
 
 if __name__ == "__main__":
