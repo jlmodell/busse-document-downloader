@@ -200,7 +200,7 @@ def search_for_files(catalog_input: str) -> list:
     
     files = list(set(files))
 
-    with open(f'./archive/{catalog_input}_list_of_files__{datetime.now():%m%d%Y%H%M%S}.txt', 'w') as f:
+    with open(f'archive/{catalog_input}_list_of_files__{datetime.now():%m%d%Y%H%M%S}.txt', 'w') as f:
         f.writelines([f'{x}\n' for x in files])
 
     return files
@@ -208,15 +208,15 @@ def search_for_files(catalog_input: str) -> list:
 def zip_files_for_download(catalog: str, files: list):
     import zipfile    
     
-    with zipfile.ZipFile(f'./archive/{catalog}.zip', 'w') as zipf:
+    with zipfile.ZipFile(f'archive/{catalog}.zip', 'w') as zipf:
         for file in files:
             zipf.write(file)    
     
 app = FastAPI()
 
-app.mount("/static", StaticFiles(directory="./static"), name="static")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
-templates = Jinja2Templates(directory="./templates")
+templates = Jinja2Templates(directory="templates")
 
 origins = [
     "http://localhost",

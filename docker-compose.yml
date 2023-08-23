@@ -10,3 +10,4 @@ services:
     restart: unless-stopped
     volumes:
       - /mnt/busse/documents:/documents
+      - ./archive:/archive
