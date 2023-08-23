@@ -3,6 +3,9 @@ from glob import glob
 import sys
 import pandas as pd
 from datetime import datetime
+import platform
+
+print(platform.system())
 
 root_path = os.path.join(os.path.join(os.getcwd(), "documents"))
 
@@ -21,7 +24,9 @@ root_dir = os.path.join(root_path, 'Document Control @ Busse', 'PDF Controlled D
 def insensitive_glob(pattern):
     def either(c):
         return '[%s%s]' % (c.lower(), c.upper()) if c.isalpha() else c
+    
     return glob(''.join(map(either, pattern)))
+    
 
 catalog = {
     # "6053": 
@@ -120,7 +125,11 @@ def search_for_files(catalog_input: str) -> list:
 
     files = []    
 
+    print(catalog.get(catalog_input))
+
     for key, file in catalog.get(catalog_input).items():
+        print(key)
+
         if file is None:
             continue
         if key in ["ink"]:
@@ -141,7 +150,10 @@ def search_for_files(catalog_input: str) -> list:
         if key == "dmr":
             pathname = os.path.join(root_dir,'*DMR*', '**', f'{catalog_input}', f'*{file}*DMR.pdf')
 
-        found = insensitive_glob(pathname)
+        if platform.system() == "Windows":
+            found = glob(pathname)
+        else:
+            found = insensitive_glob(pathname)        
 
         if found:
             if key in ["mss","mi", "qas"] and len(found) > 1:
@@ -173,7 +185,10 @@ def search_for_files(catalog_input: str) -> list:
             if key == "dmr":
                 pathname = os.path.join(root_dir,'*DMR*', '**', f'*{catalog_input}', f'*{file}*DMR.pdf')
 
-            found = insensitive_glob(pathname)
+            if platform.system() == "Windows":
+                found = glob(pathname)
+            else:
+                found = insensitive_glob(pathname)
 
             if found:
                 if key in ["mss","mi", "qas"] and len(found) > 1:
@@ -189,14 +204,18 @@ def search_for_files(catalog_input: str) -> list:
 
             else:
                 print(f'No files found for `{pathname}`.\n')
-
-    # do a final sweep for all files in the dmr folder
+    
     final_sweep = os.path.join(root_dir,'*DMR*', '**', f'{catalog_input}', f'*.pdf')
-    found = insensitive_glob(final_sweep)
+
+    if platform.system() == "Windows":
+        found = glob(final_sweep)
+    else:        
+        found = insensitive_glob(final_sweep)
+
     if found:
         files = files + found
     
-    files = list(set(files))
+    files = list(set([file.lower() for file in files]))
 
     list_of_files = os.path.join(os.getcwd(), "archive", f'{catalog_input}_list_of_files__{datetime.now():%m%d%Y%H%M%S}.txt')
 
@@ -212,11 +231,130 @@ def zip_files_for_download(catalog: str, files: list):
         for file in files:
             zipf.write(file)
 
+import re
+
+mi = re.compile(r"MI", re.IGNORECASE)
+qas = re.compile(r"QAS", re.IGNORECASE)
+mss = re.compile(r"MSS", re.IGNORECASE)
+pss = re.compile(r"PSS", re.IGNORECASE)
+dhr = re.compile(r"DHR", re.IGNORECASE)
+dmr = re.compile(r"DMR", re.IGNORECASE)
+
+def create_list_of_files():
+    global catalog
+
+    file_list = {}
+
+    for key in list(catalog.keys()):
+        print(key)
+        files = search_for_files(key)
+        for file in files:
+            directory, filename = os.path.split(file)
+            
+            if mi.search(filename):
+                qcbd_suffix = "-MI"
+                qcbd_key = filename.split(".")[0].upper().strip("MI").replace(" ","") + qcbd_suffix
+
+                if qcbd_key not in file_list:
+                    file_list[qcbd_key] = {
+                        "Item Number": qcbd_key,
+                        "File Name": filename,
+                        "Description": filename.split(".")[0],
+                        "File Path": directory,
+                    }
+                
+            elif qas.search(filename):
+                qcbd_suffix = "-QAS"
+                qcbd_key = filename.split(".")[0].upper().strip("QAS").replace(" ","") + qcbd_suffix
+
+                if qcbd_key not in file_list:
+                    file_list[qcbd_key] = {
+                        "Item Number": qcbd_key,
+                        "File Name": filename,
+                        "Description": filename.split(".")[0],
+                        "File Path": directory,
+                    }
+                
+            elif mss.search(filename):
+                qcbd_suffix = "-MSS"
+                qcbd_key = filename.split(".")[0].upper().strip("MSS").replace(" ","") + qcbd_suffix
+                
+                if qcbd_key not in file_list:
+                    file_list[qcbd_key] = {
+                        "Item Number": qcbd_key,
+                        "File Name": filename,
+                        "Description": filename.split(".")[0],
+                        "File Path": directory,
+                    }
+                
+            elif pss.search(filename):
+                qcbd_suffix = "-PSS"
+                qcbd_key = filename.split(".")[0].upper().strip("PSS").replace(" ","") + qcbd_suffix
+
+                if qcbd_key not in file_list:
+                    file_list[qcbd_key] = {
+                        "Item Number": qcbd_key,
+                        "File Name": filename,
+                        "Description": filename.split(".")[0],
+                        "File Path": directory,
+                    }
+
+            elif dhr.search(filename):
+                qcbd_suffix = "-DHR"
+                qcbd_key = filename.split(".")[0].upper().strip("DHR").replace(" ","") + qcbd_suffix
+                
+                if qcbd_key not in file_list:
+                    file_list[qcbd_key] = {
+                        "Item Number": qcbd_key,
+                        "File Name": filename,
+                        "Description": filename.split(".")[0],
+                        "File Path": directory,
+                    }
+
+                qcbd_key = filename.split(".")[0].upper().strip("DHR").replace(" ","") + "-DMR"
+                if qcbd_key not in file_list:
+                    file_list[qcbd_key] = {
+                        "Item Number": qcbd_key,
+                        "File Name": filename,
+                        "Description": filename.split(".")[0],
+                        "File Path": directory,
+                    }
+
+            elif dmr.search(filename):
+                qcbd_suffix = "-DMR"
+                qcbd_key = filename.split(".")[0].upper().strip("DMR").replace(" ","") + qcbd_suffix
+
+                if qcbd_key not in file_list:
+                    file_list[qcbd_key] = {
+                        "Item Number": qcbd_key,
+                        "File Name": filename,
+                        "Description": filename.split(".")[0],
+                        "File Path": directory,
+                    }
+
+                qcbd_key = filename.split(".")[0].upper().strip("DMR").replace(" ","") + "-DHR"
+                if qcbd_key not in file_list:                    
+                    file_list[qcbd_key] = {
+                        "Item Number": qcbd_key,
+                        "File Name": filename,
+                        "Description": filename.split(".")[0],
+                        "File Path": directory,
+                    }
+            
+            else:
+                continue
+
+            
+    
+    df = pd.DataFrame(list(file_list.values()))
+    df.to_excel("catalog.xlsx", index=False)
+
 def main():    
     read_in_dmrs()
-    catalog_nbr = user_catalog_input()
-    files = search_for_files(catalog_nbr)
-    zip_files_for_download(catalog_nbr, files)
+    # catalog_nbr = user_catalog_input()
+    # files = search_for_files(catalog_nbr)
+    # zip_files_for_download(catalog_nbr, files)
+    create_list_of_files()
 
 if __name__ == "__main__":    
     main()
