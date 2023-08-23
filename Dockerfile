@@ -10,4 +10,4 @@ COPY . .
 
 EXPOSE 8722
 
-CMD ["uvicorn", "--host", "0.0.0.0", "--port", "8722", "app.main:app"]
+CMD ["uvicorn", "--host", "0.0.0.0", "--port", "8722", "main:app"]
