@@ -12,6 +12,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 
+print(os.getcwd())
+
 # root_path = os.path.join(r'//128.1.1.64', 'Document Control')
 # if not os.path.exists(root_path):
 #     root_path = os.path.join(r'//busse')
