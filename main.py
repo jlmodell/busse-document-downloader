@@ -15,7 +15,7 @@ from fastapi.templating import Jinja2Templates
 # root_path = os.path.join(r'//128.1.1.64', 'Document Control')
 # if not os.path.exists(root_path):
 #     root_path = os.path.join(r'//busse')
-root_path = os.path.join(r'documents')
+root_path = os.path.join(r'./documents')
 assert os.path.exists(root_path), f"Root path `{root_path}` does not exist, log into the network and try again."
 
 root_dir = os.path.join(root_path, 'Document Control @ Busse', 'PDF Controlled Documents')
@@ -200,7 +200,7 @@ def search_for_files(catalog_input: str) -> list:
     
     files = list(set(files))
 
-    with open(f'archive/{catalog_input}_list_of_files__{datetime.now():%m%d%Y%H%M%S}.txt', 'w') as f:
+    with open(f'./archive/{catalog_input}_list_of_files__{datetime.now():%m%d%Y%H%M%S}.txt', 'w') as f:
         f.writelines([f'{x}\n' for x in files])
 
     return files
@@ -214,9 +214,9 @@ def zip_files_for_download(catalog: str, files: list):
     
 app = FastAPI()
 
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+app.mount("/static", StaticFiles(directory="./static"), name="static")
 
-templates = Jinja2Templates(directory="app/templates")
+templates = Jinja2Templates(directory="./templates")
 
 origins = [
     "http://localhost",
