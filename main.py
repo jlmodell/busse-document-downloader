@@ -220,10 +220,10 @@ templates = Jinja2Templates(directory="app/templates")
 
 origins = [
     "http://localhost",
-    "http://localhost:8000",
-    "https://rebate_tracing_tool.bhd-ny.com/",
-    "http://128.1.5.76:8188/",
-    "http://128.1.5.126:8188/",
+    "http://localhost:8722",
+    "https://docs.bhd-ny.com/",
+    "http://128.1.5.76:8722/",
+    "http://128.1.5.126:8722/",
 ]
 
 app.add_middleware(
