@@ -42,10 +42,10 @@ def read_in_dmrs():
     # print(os.path.join(os.getcwd(), "documents"), os.listdir(os.path.join(os.getcwd(), "documents")))
     
     file = os.path.join(root_path, "dmr.xlsx")
-    # print("dmr.xlsx exists", os.path.exists(os.path.join(root_path, "dmr.xlsx")))        
+    print(os.path.join(root_path, "dmr.xlsx"), os.path.exists(os.path.join(root_path, "dmr.xlsx")))        
     assert os.path.exists(file), f"DMR file `{file}` does not exist, log into the network and try again."
     
-    df = pd.read_excel(r"./documents/dmr.xlsx", sheet_name="Sheet1")    
+    df = pd.read_excel(os.path.join(root_path, "dmr.xlsx"), sheet_name="Sheet1")    
     df = df.fillna("")    
     df = df.astype(str)
 
