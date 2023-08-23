@@ -80,6 +80,8 @@ async def refresh_dmrs():
 async def search(request: Request, catalog_nbr: str):    
     global catalog
 
+    print(catalog)
+
     regex = re.compile(f".*{catalog_nbr}.*", re.IGNORECASE)
     # filter catalog
     keys = [key.strip().upper() for key in catalog.keys()]
