@@ -347,7 +347,7 @@ def create_list_of_files():
             
     
     df = pd.DataFrame(list(file_list.values()))
-    df.to_excel("catalog.xlsx", index=False)
+    df.to_excel(os.path.join(os.getcwd(), "archive", "catalog.xlsx"), index=False)
 
 def main():    
     read_in_dmrs()
