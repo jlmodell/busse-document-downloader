@@ -337,9 +337,9 @@ async def gather_files(
     files = search_for_files(catalog_nbr)
     zip_files_for_download(catalog_nbr, files)
 
-    import urllib.parse
+    # import urllib.parse
 
-    cleaned_files = [urllib.parse.quote(file.replace("/documents/","//busse/")) for file in files]
+    cleaned_files = [file.replace("/documents/","//busse/") for file in files]
 
     print(cleaned_files)
         
