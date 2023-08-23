@@ -20,7 +20,7 @@
     value="{{ catalog_nbr }}"
   />
   {% if details['special_instructions'] %}
-  <br />
+
   <h2>Special Instructions</h2>
   <p>{{ details['special_instructions'] }}</p>
   <br />
@@ -29,9 +29,10 @@
   <hr />
   {% endif %}
 
+  <h4 style="font-weight: 500">Files</h4>
   <ul>
     {% for file in files %}
-    <li><a href="{{ file }}" target="_blank">{{ file }}</a></li>
+    <li>{{ file }}</li>
     {% endfor %}
   </ul>
 
