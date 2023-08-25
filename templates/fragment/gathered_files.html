@@ -32,7 +32,7 @@
   <h4 style="font-weight: 500">Files</h4>
   <ul>
     {% for file in files %}
-    <li>{{ file }}</li>
+    <li><a href="{{ file_paths[file] }}" target="_blank">{{ file }}</a></li>
     {% endfor %}
   </ul>
 

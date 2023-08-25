@@ -219,6 +219,15 @@ def zip_files_for_download(catalog: str, files: list):
         for file in files:
             zipf.write(file)
 
+def copy_files_to_static_path(catalog: str, files: list):
+    import shutil
+
+    for file in files:
+        if not os.path.exists(os.path.join(os.getcwd(), "static", "files", catalog)):
+            os.makedirs(os.path.join(os.getcwd(), "static", "files", catalog))
+
+        shutil.copy(file, os.path.join(os.getcwd(), "static", "files", catalog, os.path.basename(file)))
+
 if not os.path.exists(os.path.join(os.getcwd(), "logs", "today")):
     os.makedirs(os.path.join(os.getcwd(), "logs", "today"))
 
@@ -344,14 +353,17 @@ async def gather_files(
 
     files = search_for_files(catalog_nbr)
     zip_files_for_download(catalog_nbr, files)
+    copy_files_to_static_path(catalog_nbr, files)
 
     # import urllib.parse
 
+    file_paths = {os.path.basename(file): f"/static/files/{catalog_nbr}/{os.path.basename(file)}" for file in files}
     cleaned_files = [os.path.basename(file) for file in files]
 
     # print(cleaned_files)
         
-    context["files"] = cleaned_files    
+    context["files"] = cleaned_files
+    context["file_paths"] = file_paths
 
     return templates.TemplateResponse("fragment/gathered_files.html", context)
 
