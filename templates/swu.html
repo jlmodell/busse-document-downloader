@@ -1,0 +1,61 @@
+{% extends 'base.html' %} {% block style %}
+<style>
+  detail_grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 10px;
+  }
+</style>
+{% endblock %} {% block content %}
+
+<form id="form" class="" hx-trigger="submit" hx-post="/search_documents">
+  <div class="grid">
+    <label class="" for="document_nbr"
+      ><strong>Document Number</strong
+      ><input
+        id="document_nbr"
+        autocomplete="off"
+        class=""
+        type="text"
+        name="document_nbr"
+        placeholder="Note: Written as in DMR"
+        hx-target="#search_results"
+        hx-get="/search_documents"
+        hx-include="#document_nbr"
+        hx-trigger="keyup changed delay:500ms"
+        required
+    /></label>
+  </div>
+
+  <div id="search_results"></div>
+
+  <div>
+    <button style="font-weight: 500" id="search" class="" type="submit">
+      Search
+    </button>
+  </div>
+</form>
+
+<div style="position: fixed; top: 10px; right: 30px">
+  <button
+    hx-get="/refresh"
+    class="secondary"
+    style="
+      text-align: center;
+      font-weight: 500;
+      font-size: 0.7rem;
+      padding: 0.5rem;
+      padding-left: 1.5rem;
+      padding-right: 1rem;
+    "
+  >
+    Refresh DMR's
+    <img
+      class="htmx-indicator"
+      style="width: 1rem; height: 1rem; margin-left: 0.25rem"
+      src="{{ url_for('static', path='/images/spinning-circles.svg') }}"
+    />
+  </button>
+</div>
+
+{% endblock %} {% block javascript %} {% endblock %}

@@ -30,6 +30,11 @@
 
         let inputField = document.getElementById("catalog_nbr");
 
+        // if inputField is null, then we are on the swu page
+        if (inputField == null) {
+          inputField = document.getElementById("document_nbr");
+        }
+
         inputField.value = inputValue;
 
         let searchButton = document.getElementById("search");

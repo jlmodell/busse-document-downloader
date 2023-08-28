@@ -46,10 +46,14 @@ def insensitive_glob(pattern):
         return '[%s%s]' % (c.lower(), c.upper()) if c.isalpha() else c
     return glob(''.join(map(either, pattern)))
 
+catalog = {}
+documents = {}
+
 def read_in_dmrs():
-    global catalog, root_path
+    global catalog, root_path, documents
     
     catalog = {}
+    documents = {}
         
     # print(os.path.join(os.getcwd(), "documents"), os.listdir(os.path.join(os.getcwd(), "documents")))
     
@@ -97,7 +101,28 @@ def read_in_dmrs():
     print("Catalog dictionary created. with", len(catalog), "entries")
     print()
 
-    return catalog
+    # go through all keys inside catalog dict and create a documents dict that is a key (document) to list of catalog numbers that use that document
+    for catalog_nbr, details in catalog.items():
+        for key, value in details.items():
+            if value is None:
+                continue
+            if key == "special_instructions":
+                continue
+            if value not in documents:
+                documents[value] = []
+            documents[value].append(catalog_nbr)
+
+    # go through all keys in documents dict and remove duplicates and sort and uppercase
+    for key, value in documents.items():
+        documents[key] = list(set(value))
+        documents[key].sort()
+        documents[key] = [x.upper() for x in documents[key]]
+
+    print()
+    print("Documents dictionary created. with", len(documents), "entries")
+    print()
+
+    return catalog, documents
 
 def user_catalog_input():
     search = False    
@@ -231,8 +256,6 @@ def copy_files_to_static_path(catalog: str, files: list):
 if not os.path.exists(os.path.join(os.getcwd(), "logs", "today")):
     os.makedirs(os.path.join(os.getcwd(), "logs", "today"))
 
-read_in_dmrs()
-
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory=os.path.join(os.getcwd(), "static")), name="static")
@@ -255,9 +278,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+
+@app.on_event("startup")
+async def startup_event():
+    read_in_dmrs()
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    global catalog
+    # global catalog
 
     title = "Busse File Gatherer"
 
@@ -266,10 +295,10 @@ async def index(request: Request):
         "title": title,
     }
     
-    keys = [key.strip().upper() for key in catalog.keys()]
-    keys.sort()
+    # keys = [key.strip().upper() for key in catalog.keys()]
+    # keys.sort()
 
-    context["catalog"] = keys
+    # context["catalog"] = keys
 
     return templates.TemplateResponse("main.html", context)
 
@@ -377,6 +406,55 @@ async def download_file(catalog_nbr: str):
 
     return FileResponse(file_path, filename=f"{catalog_nbr}__{datetime.now():%m-%d-%Y_%H%M%S}__.zip")
 
+
+@app.get("/swu", response_class=HTMLResponse)
+async def swu(request: Request):
+    context = {
+        "request": request,
+    }
+
+    return templates.TemplateResponse("swu.html", context)
+
+@app.get("/search_documents", response_class=HTMLResponse)
+async def search_documents(request: Request, document_nbr: str):    
+    global documents    
+
+    regex = re.compile(f".*{document_nbr}.*", re.IGNORECASE)
+    
+    keys = [key.strip().upper() for key in documents.keys()]
+    keys.sort()
+
+    context = {
+        "request": request,
+        "keys": [key for key in keys if regex.match(key)],
+    }
+
+    return templates.TemplateResponse("fragment/document_results.html", context)
+
+@app.post("/search_documents", response_class=HTMLResponse)
+async def find_in_documents(request: Request, document_nbr_param: str = "", document_nbr: str = Form(...)):
+    global documents    
+
+    context = {
+        "request": request,
+    }
+    
+    context["details"] = []
+
+    print({"catalog_nbr_param":document_nbr_param, "catalog_nbr": document_nbr})
+
+    if document_nbr_param != "":
+        document_nbr = document_nbr_param
+
+    context["document_nbr"] = document_nbr
+
+    list_of_documents = documents.get(document_nbr, None)
+    if len(list_of_documents) == 0:
+        return templates.TemplateResponse("fragment/not_found.html", context)
+
+    context["documents"] = list_of_documents
+
+    return templates.TemplateResponse("fragment/results_list.html", context)
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,0 +1,15 @@
+<div>
+  <br />
+  <ul>
+    {% for key in keys %}
+    <li
+      id="key"
+      style="text-decoration: underline; cursor: pointer"
+      onClick="updateInputValue('{{ key }}')"
+    >
+      {{ key }}
+    </li>
+    {% endfor %}
+  </ul>
+  <br />
+</div>
