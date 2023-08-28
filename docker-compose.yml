@@ -14,3 +14,4 @@ services:
       - ./logs:/logs
       - ./main.py:/main.py
       - ./static:/static
+      - ./templates:/templates
