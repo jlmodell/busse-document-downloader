@@ -441,7 +441,7 @@ async def find_in_documents(request: Request, document_nbr_param: str = "", docu
     
     context["details"] = []
 
-    print({"catalog_nbr_param":document_nbr_param, "catalog_nbr": document_nbr})
+    print({"document_nbr_param":document_nbr_param, "document_nbr": document_nbr})
 
     if document_nbr_param != "":
         document_nbr = document_nbr_param
