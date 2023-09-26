@@ -6,10 +6,18 @@ import pandas as pd
 from datetime import datetime
 import platform
 
-from fastapi import BackgroundTasks, FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import BackgroundTasks, FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
+
+whitelist = {"142.54.77.195", "142.54.77.196", "142.54.77.197", "142.54.77.198"}
+
+def check_ip(request: Request):
+    client_ip = request.client.host
+    if client_ip not in whitelist:
+        raise HTTPException(status_code=403, detail="Access denied: IP not in whitelist")
+    return client_ip
 
 LAST_UPDATED = datetime.now()
 
@@ -302,19 +310,9 @@ app = FastAPI()
 
 app.mount("/static", StaticFiles(directory=os.path.join(os.getcwd(), "static")), name="static")
 
-origins = [
-    "http://127.0.0.1",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:8722",
-    "http://localhost",
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://localhost:8722",
-    "https://docs.bhd-ny.com/",
-    "http://128.1.5.76:3000/",
-    "http://128.1.5.76:8722/",
-    "http://128.1.5.126:8722/",
+origins = [    
+    "http://localhost:3000",    
+    "https://docs.bhd-ny.com/",    
 ]
 
 app.add_middleware(
@@ -342,16 +340,16 @@ async def startup_event():
     read_in_dmrs()    
 
 @app.get("/")
-async def index():
-    return {"app_name": "busse-documents-loader-v2", "paths": ["/", "/refresh", "/search/files", "/search/swu", "/download/{catalog}"], "last_updated": f"{LAST_UPDATED:%m/%d/%Y %H:%M:%S}"}
+async def index(ip: str = Depends(check_ip)):
+    return {"request_ip": ip, "app_name": "busse-documents-loader-v2", "paths": ["/", "/refresh", "/search/files", "/search/swu", "/download/{catalog}"], "last_updated": f"{LAST_UPDATED:%m/%d/%Y %H:%M:%S}"}
 
 @app.get("/refresh")
-async def refresh():
+async def refresh(ip: str = Depends(check_ip)):
     read_in_dmrs()
     return {"message": "refreshed"}
 
 @app.get("/search/files", response_class=JSONResponse)
-async def search(cat_nbr: str | None = None):    
+async def search(cat_nbr: str | None = None, ip: str = Depends(check_ip)):    
     global CATALOGS
     keys = [key.strip().upper() for key in CATALOGS.keys()]
     keys.sort()
@@ -361,7 +359,7 @@ async def search(cat_nbr: str | None = None):
     return [key for key in keys if regex.match(key)]
 
 @app.get("/search/swu", response_class=JSONResponse)
-async def search_documents(doc_nbr: str):
+async def search_documents(doc_nbr: str, ip: str = Depends(check_ip)):
     global DOCUMENTS
     keys = [key.strip().upper() for key in DOCUMENTS.keys()]
     keys.sort()
@@ -371,7 +369,7 @@ async def search_documents(doc_nbr: str):
     return [key for key in keys if regex.match(key)]
 
 @app.post("/search/files", response_class=JSONResponse)
-async def find_catalog_details(cat_nbr: str | None = None, ):
+async def find_catalog_details(cat_nbr: str | None = None, ip: str = Depends(check_ip)):
     if cat_nbr is None:
         raise HTTPException(status_code=404, detail=f"Catalog number ({cat_nbr}) not found")
     global CATALOGS
@@ -381,7 +379,7 @@ async def find_catalog_details(cat_nbr: str | None = None, ):
     return details
 
 @app.post("/gather/files", response_class=JSONResponse)
-async def gather_files_tasker(background_tasks: BackgroundTasks, cat_nbr: str | None = None):
+async def gather_files_tasker(background_tasks: BackgroundTasks, cat_nbr: str | None = None, ip: str = Depends(check_ip)):
     if cat_nbr is None:
         raise HTTPException(status_code=404, detail=f"Catalog number ({cat_nbr}) not found")
     uuid = f"{cat_nbr}__{datetime.now():%m%d%Y%H%M%S}"
@@ -393,11 +391,11 @@ async def gather_files_tasker(background_tasks: BackgroundTasks, cat_nbr: str | 
     return uuid
 
 @app.get("/gather/files", response_class=JSONResponse)
-async def gather_files(uuid: str):
+async def gather_files(uuid: str, ip: str = Depends(check_ip)):
     return LINKS.get(uuid.split("__")[0], None)    
 
 @app.post("/search/swu", response_class=JSONResponse)
-async def find_in_documents(doc_nbr: str | None = None):
+async def find_in_documents(doc_nbr: str | None = None, ip: str = Depends(check_ip)):
     global DOCUMENTS
     documents_in_use = DOCUMENTS.get(doc_nbr, None)
     if documents_in_use is None:
@@ -405,7 +403,7 @@ async def find_in_documents(doc_nbr: str | None = None):
     return documents_in_use
 
 @app.get("/download/{cat_nbr}/{file_name}", response_class=FileResponse)
-async def download_file(cat_nbr: str, file_name: str):
+async def download_file(cat_nbr: str, file_name: str, ip: str = Depends(check_ip)):
     path = os.path.join(STATIC_FILES, cat_nbr, file_name)
     
     if not os.path.exists(path):
@@ -414,7 +412,7 @@ async def download_file(cat_nbr: str, file_name: str):
     return FileResponse(path, media_type="application/pdf", filename=file_name)
 
 @app.get("/download/zip/{cat_nbr}", response_class=FileResponse)
-async def download_zipped_file(cat_nbr: str):
+async def download_zipped_file(cat_nbr: str, ip: str = Depends(check_ip)):
     if platform.system() == "Windows":        
         files = [os.path.basename(key).upper() for key in glob(os.path.join(STATIC_FILES, '*.zip'))]
     else:
