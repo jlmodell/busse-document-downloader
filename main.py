@@ -165,8 +165,8 @@ def build_download_links(cat_nbr: str):
     if not os.path.exists(path):
         raise HTTPException(status_code=404, detail=f"Catalog number ({cat_nbr}) not found")
     if platform.system() == "Windows":        
-        return [f"download/{cat_nbr}/{os.path.basename(key).upper()}" for key in glob(os.path.join(STATIC_FILES, cat_nbr, "*"))]
-    return [f"download/{cat_nbr}/{os.path.basename(key).upper()}" for key in insensitive_glob(os.path.join(STATIC_FILES, cat_nbr, "*"))]
+        return [f"download/{cat_nbr}/{os.path.basename(key)}" for key in glob(os.path.join(STATIC_FILES, cat_nbr, "*"))]
+    return [f"download/{cat_nbr}/{os.path.basename(key)}" for key in insensitive_glob(os.path.join(STATIC_FILES, cat_nbr, "*"))]
 
 async def search_for_files(catalog_input: str, uuid: str) -> list:    
     global CATALOGS, ROOT_DIR
@@ -407,9 +407,6 @@ async def find_in_documents(doc_nbr: str | None = None):
 @app.get("/download/{cat_nbr}/{file_name}", response_class=FileResponse)
 async def download_file(cat_nbr: str, file_name: str):
     path = os.path.join(STATIC_FILES, cat_nbr, file_name)
-
-    if not os.path.exists(path):
-        path = os.path.join(STATIC_FILES, cat_nbr, file_name.rstrip(".PDF") + ".pdf")
     
     if not os.path.exists(path):
         raise HTTPException(status_code=404, detail=f"Catalog number ({cat_nbr}) not found")
