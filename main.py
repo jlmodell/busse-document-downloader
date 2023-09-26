@@ -15,8 +15,8 @@ whitelist = {"142.54.77.195", "142.54.77.196", "142.54.77.197", "142.54.77.198"}
 
 def check_ip(request: Request):
     client_ip = request.client.host
-    if client_ip not in whitelist:
-        raise HTTPException(status_code=403, detail="Access denied: IP not in whitelist")
+    # if client_ip not in whitelist:
+    #     raise HTTPException(status_code=403, detail="Access denied: IP not in whitelist")
     return client_ip
 
 LAST_UPDATED = datetime.now()
@@ -312,7 +312,7 @@ app.mount("/static", StaticFiles(directory=os.path.join(os.getcwd(), "static")),
 
 origins = [    
     "http://localhost:3000",    
-    "https://docs.bhd-ny.com/",    
+    "https://docs.bhd-ny.com",
 ]
 
 app.add_middleware(
