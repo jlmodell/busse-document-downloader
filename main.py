@@ -407,6 +407,9 @@ async def find_in_documents(doc_nbr: str | None = None):
 @app.get("/download/{cat_nbr}/{file_name}", response_class=FileResponse)
 async def download_file(cat_nbr: str, file_name: str):
     path = os.path.join(STATIC_FILES, cat_nbr, file_name)
+    
+    print(path)
+
     if not os.path.exists(path):
         raise HTTPException(status_code=404, detail=f"Catalog number ({cat_nbr}) not found")
     return FileResponse(path, media_type="application/pdf", filename=file_name)
