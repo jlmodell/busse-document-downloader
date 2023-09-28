@@ -1,4 +1,6 @@
 import os
+from dotenv import load_dotenv
+load_dotenv()
 import re
 from glob import glob
 import sys
@@ -13,16 +15,42 @@ from fastapi_nextauth_jwt import NextAuthJWT
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 
-import yaml
+app = FastAPI()
 
+app.mount("/static", StaticFiles(directory=os.path.join(os.getcwd(), "static")), name="static")
 
-config = yaml.load(open("config.yaml", "r"), Loader=yaml.FullLoader)
-secret = config.get("NEXTAUTH_SECRET", None)
-assert secret is not None, "NEXTAUTH_SECRET not found in config.yaml"
+origins = [    
+    "http://localhost:3000",    
+    "https://docs.bhd-ny.com",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+secret = os.getenv("NEXTAUTH_SECRET", None)
+assert secret is not None, "NEXTAUTH_SECRET was not set"
 
 JWT = NextAuthJWT(
     secret=secret,
 )
+
+def print_request_cookies(request: Request):
+    print()
+    print("Cookies:")
+    for key, value in request.cookies.items():
+        print(f"{key}: {value}")
+    print()
+
+    JWT = NextAuthJWT(
+        secret=secret,
+    )
+
+    print(JWT)
 
 LAST_UPDATED = datetime.now()
 
@@ -309,25 +337,6 @@ async def search_for_files(catalog_input: str, uuid: str) -> list:
 
 
 
-### app
-
-app = FastAPI()
-
-app.mount("/static", StaticFiles(directory=os.path.join(os.getcwd(), "static")), name="static")
-
-origins = [    
-    "http://localhost:3000",    
-    "https://docs.bhd-ny.com",
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket_manager.connect(websocket)
@@ -346,7 +355,7 @@ async def startup_event():
 
 @app.get("/")
 async def index(jwt: Annotated[dict, Depends(JWT)]):
-    return {"request_ip": ip, "app_name": "busse-documents-loader-v2", "paths": ["/", "/refresh", "/search/files", "/search/swu", "/download/{catalog}"], "last_updated": f"{LAST_UPDATED:%m/%d/%Y %H:%M:%S}"}
+    return {"app_name": "busse-documents-loader-v2", "paths": ["/", "/refresh", "/search/files", "/search/swu", "/download/{catalog}"], "last_updated": f"{LAST_UPDATED:%m/%d/%Y %H:%M:%S}"}
 
 @app.get("/refresh")
 async def refresh(jwt: Annotated[dict, Depends(JWT)]):
@@ -354,39 +363,35 @@ async def refresh(jwt: Annotated[dict, Depends(JWT)]):
     return {"message": "refreshed"}
 
 @app.get("/search/files", response_class=JSONResponse)
-async def search(jwt: Annotated[dict, Depends(JWT)], cat_nbr: str | None = None):    
+async def search(
+        jwt: Annotated[dict, Depends(JWT)],
+        # cookies: None = Depends(print_request_cookies),
+        cat_nbr: str | None = None
+    ):    
+
     global CATALOGS
+    
     keys = [key.strip().upper() for key in CATALOGS.keys()]
     keys.sort()
+    
     if cat_nbr is None:
         return keys        
+    
     regex = re.compile(f"^{cat_nbr}.*", re.IGNORECASE)    
+    
     return [key for key in keys if regex.match(key)]
 
-@app.get("/search/swu", response_class=JSONResponse)
-async def search_documents(doc_nbr: str, jwt: Annotated[dict, Depends(JWT)]):
-    global DOCUMENTS
-    keys = [key.strip().upper() for key in DOCUMENTS.keys()]
-    keys.sort()
-    if doc_nbr is None:
-        return keys     
-    regex = re.compile(f".*{doc_nbr}.*", re.IGNORECASE)
-    return [key for key in keys if regex.match(key)]
-
-@app.post("/search/files", response_class=JSONResponse)
-async def find_catalog_details(jwt: Annotated[dict, Depends(JWT)], cat_nbr: str | None = None):
+@app.get("/gather/files", response_class=JSONResponse)
+async def gather_files_tasker(
+        jwt: Annotated[dict, Depends(JWT)],
+        background_tasks: BackgroundTasks, 
+        # cookies: None = Depends(print_request_cookies),    
+        cat_nbr: str | None = None
+    ):
+    
     if cat_nbr is None:
         raise HTTPException(status_code=404, detail=f"Catalog number ({cat_nbr}) not found")
-    global CATALOGS
-    details = CATALOGS.get(cat_nbr, None)
-    if not details:            
-        raise HTTPException(status_code=404, detail=f"Catalog number ({cat_nbr}) not found")
-    return details
-
-@app.post("/gather/files", response_class=JSONResponse)
-async def gather_files_tasker(jwt: Annotated[dict, Depends(JWT)], background_tasks: BackgroundTasks, cat_nbr: str | None = None):
-    if cat_nbr is None:
-        raise HTTPException(status_code=404, detail=f"Catalog number ({cat_nbr}) not found")
+    
     uuid = f"{cat_nbr}__{datetime.now():%m%d%Y%H%M%S}"
     background_tasks.add_task(search_for_files, cat_nbr, uuid)    
     # await search_for_files(cat_nbr, uuid)
@@ -395,20 +400,41 @@ async def gather_files_tasker(jwt: Annotated[dict, Depends(JWT)], background_tas
 
     return uuid
 
-@app.get("/gather/files", response_class=JSONResponse)
-async def gather_files(uuid: str, jwt: Annotated[dict, Depends(JWT)]):
-    return LINKS.get(uuid.split("__")[0], None)    
+@app.get("/search/swu", response_class=JSONResponse)
+async def search_documents(
+        jwt: Annotated[dict, Depends(JWT)],
+        doc_nbr: str
+    ):
 
-@app.post("/search/swu", response_class=JSONResponse)
-async def find_in_documents(jwt: Annotated[dict, Depends(JWT)], doc_nbr: str | None = None):
     global DOCUMENTS
+
+    keys = [key.strip().upper() for key in DOCUMENTS.keys()]
+    keys.sort()
+    
+    if doc_nbr is None:
+        return keys     
+    
+    regex = re.compile(f".*{doc_nbr}.*", re.IGNORECASE)
+    
+    return [key for key in keys if regex.match(key)]
+
+@app.get("/gather/swu", response_class=JSONResponse)
+async def find_in_documents(
+        jwt: Annotated[dict, Depends(JWT)],
+        doc_nbr: str | None = None,        
+    ):
+
+    global DOCUMENTS
+    
     documents_in_use = DOCUMENTS.get(doc_nbr, None)
+    
     if documents_in_use is None:
         raise HTTPException(status_code=404, detail=f"Document number ({doc_nbr}) not found")
+    
     return documents_in_use
 
 @app.get("/download/{cat_nbr}/{file_name}", response_class=FileResponse)
-async def download_file(cat_nbr: str, file_name: str, jwt: Annotated[dict, Depends(JWT)]):
+async def download_file(cat_nbr: str, file_name: str):
     path = os.path.join(STATIC_FILES, cat_nbr, file_name)
     
     if not os.path.exists(path):
