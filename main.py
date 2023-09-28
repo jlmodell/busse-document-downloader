@@ -347,13 +347,13 @@ app = FastAPI(
     middleware=middleware,
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=origins,
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 app.mount("/static", StaticFiles(directory=os.path.join(os.getcwd(), "static")), name="static")
 
