@@ -10,7 +10,8 @@ import platform
 
 from typing import Annotated
 from fastapi import BackgroundTasks, FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Request, Depends
-from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.cors import CORSMiddleware
+# from fastapi.middleware.cors import CORSMiddleware
 from fastapi_nextauth_jwt import NextAuthJWT
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
@@ -19,9 +20,9 @@ from fastapi.responses import FileResponse, JSONResponse
 secret = os.getenv("NEXTAUTH_SECRET", None)
 assert secret is not None, "NEXTAUTH_SECRET was not set"
 
-# JWT = NextAuthJWT(
-#     secret=secret,
-# )
+JWT = NextAuthJWT(
+    secret=secret,
+)
 
 def print_request_cookies(request: Request):
     print()
@@ -30,11 +31,11 @@ def print_request_cookies(request: Request):
         print(f"{key}: {value}")
     print()
 
-    # JWT = NextAuthJWT(
-    #     secret=secret,
-    # )
+    JWT = NextAuthJWT(
+        secret=secret,
+    )
 
-    # print(JWT)
+    print(JWT)
 
 LAST_UPDATED = datetime.now()
 
@@ -333,8 +334,6 @@ app.mount("/static", StaticFiles(directory=os.path.join(os.getcwd(), "static")),
 origins = [    
     "http://localhost:3000",    
     "https://docs.bhd-ny.com",
-    "https://docs.bhd-ny.com/",
-    "https://docs.bhd-ny.com/*",
 ]
 
 app.add_middleware(
@@ -376,7 +375,7 @@ async def refresh(
 
 @app.get("/search/files", response_class=JSONResponse)
 async def search(
-        # jwt: Annotated[dict, Depends(JWT)],
+        jwt: Annotated[dict, Depends(JWT)],
         cookies: None = Depends(print_request_cookies),
         cat_nbr: str | None = None
     ):    
@@ -395,7 +394,7 @@ async def search(
 
 @app.get("/gather/files", response_class=JSONResponse)
 async def gather_files_tasker(
-        # jwt: Annotated[dict, Depends(JWT)],
+        jwt: Annotated[dict, Depends(JWT)],
         background_tasks: BackgroundTasks, 
         cookies: None = Depends(print_request_cookies),    
         cat_nbr: str | None = None
@@ -405,8 +404,7 @@ async def gather_files_tasker(
         raise HTTPException(status_code=404, detail=f"Catalog number ({cat_nbr}) not found")
     
     uuid = f"{cat_nbr}__{datetime.now():%m%d%Y%H%M%S}"
-    background_tasks.add_task(search_for_files, cat_nbr, uuid)    
-    # await search_for_files(cat_nbr, uuid)
+    background_tasks.add_task(search_for_files, cat_nbr, uuid)        
 
     await websocket_manager.send_message({"status": "gathering", "uuid": uuid, "catalog": cat_nbr})
 
@@ -414,7 +412,7 @@ async def gather_files_tasker(
 
 @app.get("/search/swu", response_class=JSONResponse)
 async def search_documents(
-        # jwt: Annotated[dict, Depends(JWT)],
+        jwt: Annotated[dict, Depends(JWT)],
         doc_nbr: str
     ):
 
@@ -432,7 +430,7 @@ async def search_documents(
 
 @app.get("/gather/swu", response_class=JSONResponse)
 async def find_in_documents(
-        # jwt: Annotated[dict, Depends(JWT)],
+        jwt: Annotated[dict, Depends(JWT)],
         doc_nbr: str | None = None,        
     ):
 
