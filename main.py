@@ -10,6 +10,7 @@ import platform
 
 from typing import Annotated
 from fastapi import BackgroundTasks, FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Request, Depends
+from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 # from fastapi.middleware.cors import CORSMiddleware
 from fastapi_nextauth_jwt import NextAuthJWT
@@ -326,16 +327,25 @@ async def search_for_files(catalog_input: str, uuid: str) -> list:
 #####################################
 #####################################
 
-
-app = FastAPI()
-
-app.mount("/static", StaticFiles(directory=os.path.join(os.getcwd(), "static")), name="static")
-
 origins = [
-    "*",
-    # "http://localhost:3000",    
-    # "https://docs.bhd-ny.com",
+    # "*",
+    "http://localhost:3000",    
+    "https://docs.bhd-ny.com",
 ]
+
+middleware = [
+    Middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=['*'],
+        allow_headers=['*']
+    )
+]
+
+app = FastAPI(
+    middleware=middleware,
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -344,6 +354,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.mount("/static", StaticFiles(directory=os.path.join(os.getcwd(), "static")), name="static")
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
