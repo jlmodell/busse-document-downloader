@@ -15,22 +15,6 @@ from fastapi_nextauth_jwt import NextAuthJWT
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 
-app = FastAPI()
-
-app.mount("/static", StaticFiles(directory=os.path.join(os.getcwd(), "static")), name="static")
-
-origins = [    
-    "http://localhost:3000",    
-    "https://docs.bhd-ny.com",
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 secret = os.getenv("NEXTAUTH_SECRET", None)
 assert secret is not None, "NEXTAUTH_SECRET was not set"
@@ -335,7 +319,31 @@ async def search_for_files(catalog_input: str, uuid: str) -> list:
 
     return files
 
+#####################################
+#####################################
+###############FASTAPI###############
+#####################################
+#####################################
 
+
+app = FastAPI()
+
+app.mount("/static", StaticFiles(directory=os.path.join(os.getcwd(), "static")), name="static")
+
+origins = [    
+    "http://localhost:3000",    
+    "https://docs.bhd-ny.com",
+    "https://docs.bhd-ny.com/",
+    "https://docs.bhd-ny.com/*",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
