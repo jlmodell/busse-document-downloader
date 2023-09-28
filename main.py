@@ -333,18 +333,18 @@ origins = [
     "https://docs.bhd-ny.com",
 ]
 
-middleware = [
-    Middleware(
-        CORSMiddleware,
-        allow_origins=origins,
-        allow_credentials=True,
-        allow_methods=['*'],
-        allow_headers=['*']
-    )
-]
+# middleware = [
+#     Middleware(
+#         CORSMiddleware,
+#         allow_origins=origins,
+#         allow_credentials=True,
+#         allow_methods=['*'],
+#         allow_headers=['*']
+#     )
+# ]
 
 app = FastAPI(
-    middleware=middleware,
+    # middleware=middleware,
 )
 
 # app.add_middleware(
@@ -359,14 +359,14 @@ app = FastAPI(
 
 app.mount("/static", StaticFiles(directory=os.path.join(os.getcwd(), "static")), name="static")
 
-# @app.middleware("http")
-# async def cors_handler(request: Request, call_next):
-#     response: Response = await call_next(request)
-#     response.headers['Access-Control-Allow-Credentials'] = 'true'
-#     response.headers['Access-Control-Allow-Origin'] = origins
-#     response.headers['Access-Control-Allow-Methods'] = '*'
-#     response.headers['Access-Control-Allow-Headers'] = '*'
-#     return response
+@app.middleware("http")
+async def cors_handler(request: Request, call_next):
+    response: Response = await call_next(request)
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    response.headers['Access-Control-Allow-Origin'] = origins
+    response.headers['Access-Control-Allow-Methods'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = '*'
+    return response
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
