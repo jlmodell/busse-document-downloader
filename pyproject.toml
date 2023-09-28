@@ -16,6 +16,8 @@ apscheduler = "^3.10.4"
 uvicorn = "^0.23.2"
 jinja2 = "^3.1.2"
 python-multipart = "^0.0.6"
+fastapi-nextauth-jwt = "^1.1.2"
+pyyaml = "^6.0.1"
 
 
 [tool.poetry.group.dev.dependencies]

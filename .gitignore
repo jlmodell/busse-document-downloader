@@ -7,3 +7,4 @@ dist
 *.pyc
 *.pyc
 /**/__pycache__
+config.yaml
