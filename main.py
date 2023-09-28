@@ -35,9 +35,9 @@ app.add_middleware(
 secret = os.getenv("NEXTAUTH_SECRET", None)
 assert secret is not None, "NEXTAUTH_SECRET was not set"
 
-JWT = NextAuthJWT(
-    secret=secret,
-)
+# JWT = NextAuthJWT(
+#     secret=secret,
+# )
 
 def print_request_cookies(request: Request):
     print()
@@ -46,11 +46,11 @@ def print_request_cookies(request: Request):
         print(f"{key}: {value}")
     print()
 
-    JWT = NextAuthJWT(
-        secret=secret,
-    )
+    # JWT = NextAuthJWT(
+    #     secret=secret,
+    # )
 
-    print(JWT)
+    # print(JWT)
 
 LAST_UPDATED = datetime.now()
 
@@ -354,18 +354,22 @@ async def startup_event():
     read_in_dmrs()    
 
 @app.get("/")
-async def index(jwt: Annotated[dict, Depends(JWT)]):
+async def index(
+        # jwt: Annotated[dict, Depends(JWT)]
+    ):
     return {"app_name": "busse-documents-loader-v2", "paths": ["/", "/refresh", "/search/files", "/search/swu", "/download/{catalog}"], "last_updated": f"{LAST_UPDATED:%m/%d/%Y %H:%M:%S}"}
 
 @app.get("/refresh")
-async def refresh(jwt: Annotated[dict, Depends(JWT)]):
+async def refresh(
+        # jwt: Annotated[dict, Depends(JWT)]
+    ):
     read_in_dmrs()
     return {"message": "refreshed"}
 
 @app.get("/search/files", response_class=JSONResponse)
 async def search(
-        jwt: Annotated[dict, Depends(JWT)],
-        # cookies: None = Depends(print_request_cookies),
+        # jwt: Annotated[dict, Depends(JWT)],
+        cookies: None = Depends(print_request_cookies),
         cat_nbr: str | None = None
     ):    
 
@@ -383,9 +387,9 @@ async def search(
 
 @app.get("/gather/files", response_class=JSONResponse)
 async def gather_files_tasker(
-        jwt: Annotated[dict, Depends(JWT)],
+        # jwt: Annotated[dict, Depends(JWT)],
         background_tasks: BackgroundTasks, 
-        # cookies: None = Depends(print_request_cookies),    
+        cookies: None = Depends(print_request_cookies),    
         cat_nbr: str | None = None
     ):
     
@@ -402,7 +406,7 @@ async def gather_files_tasker(
 
 @app.get("/search/swu", response_class=JSONResponse)
 async def search_documents(
-        jwt: Annotated[dict, Depends(JWT)],
+        # jwt: Annotated[dict, Depends(JWT)],
         doc_nbr: str
     ):
 
@@ -420,7 +424,7 @@ async def search_documents(
 
 @app.get("/gather/swu", response_class=JSONResponse)
 async def find_in_documents(
-        jwt: Annotated[dict, Depends(JWT)],
+        # jwt: Annotated[dict, Depends(JWT)],
         doc_nbr: str | None = None,        
     ):
 
