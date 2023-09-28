@@ -9,35 +9,35 @@ from datetime import datetime
 
 import pandas as pd
 
-from typing import Annotated
 from fastapi import BackgroundTasks, FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Request, Depends, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi_nextauth_jwt import NextAuthJWT
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 
+# from typing import Annotated
+# from fastapi_nextauth_jwt import NextAuthJWT
 
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
-secret = os.getenv("NEXTAUTH_SECRET", None)
+# secret = os.getenv("NEXTAUTH_SECRET", None)
 
-JWT = NextAuthJWT(
-    secret=secret,
-)
+# JWT = NextAuthJWT(
+#     secret=secret,
+# )
 
-def print_request_cookies(request: Request):
-    print()
-    print("Cookies:")
-    for key, value in request.cookies.items():
-        print(f"{key}: {value}")
-    print()
+# def print_request_cookies(request: Request):
+#     print()
+#     print("Cookies:")
+#     for key, value in request.cookies.items():
+#         print(f"{key}: {value}")
+#     print()
 
-    JWT = NextAuthJWT(
-        secret=secret,
-    )
+#     JWT = NextAuthJWT(
+#         secret=secret,
+#     )
 
-    print(JWT)
+#     print(JWT)
 
 #####################################
 #####################################
@@ -377,7 +377,7 @@ async def index():
 
 @app.get("/refresh")
 async def refresh(
-        jwt: Annotated[dict, Depends(JWT)]
+        # jwt: Annotated[dict, Depends(JWT)]
     ):
     global LINKS
     LINKS = {}
@@ -386,8 +386,8 @@ async def refresh(
 
 @app.get("/search/files", response_class=JSONResponse)
 async def search(
-        jwt: Annotated[dict, Depends(JWT)],
-        cookies: None = Depends(print_request_cookies),
+        # jwt: Annotated[dict, Depends(JWT)],
+        # cookies: None = Depends(print_request_cookies),
         cat_nbr: str | None = None
     ):    
 
@@ -406,8 +406,8 @@ async def search(
 @app.get("/gather/files", response_class=JSONResponse)
 async def gather_files_tasker(        
         background_tasks: BackgroundTasks, 
-        jwt: Annotated[dict, Depends(JWT)],
-        cookies: None = Depends(print_request_cookies),    
+        # jwt: Annotated[dict, Depends(JWT)],
+        # cookies: None = Depends(print_request_cookies),    
         cat_nbr: str | None = None
     ):
     
@@ -424,8 +424,8 @@ async def gather_files_tasker(
 @app.get("/search/swu", response_class=JSONResponse)
 async def search_documents(
         doc_nbr: str,
-        jwt: Annotated[dict, Depends(JWT)],
-        cookies: None = Depends(print_request_cookies),            
+        # jwt: Annotated[dict, Depends(JWT)],
+        # cookies: None = Depends(print_request_cookies),            
     ):
 
     global DOCUMENTS
@@ -442,8 +442,8 @@ async def search_documents(
 
 @app.get("/gather/swu", response_class=JSONResponse)
 async def find_in_documents(        
-        jwt: Annotated[dict, Depends(JWT)],
-        cookies: None = Depends(print_request_cookies),     
+        # jwt: Annotated[dict, Depends(JWT)],
+        # cookies: None = Depends(print_request_cookies),     
         doc_nbr: str | None = None,                        
     ):
 
