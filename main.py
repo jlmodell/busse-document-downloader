@@ -331,9 +331,10 @@ app = FastAPI()
 
 app.mount("/static", StaticFiles(directory=os.path.join(os.getcwd(), "static")), name="static")
 
-origins = [    
-    "http://localhost:3000",    
-    "https://docs.bhd-ny.com",
+origins = [
+    "*",
+    # "http://localhost:3000",    
+    # "https://docs.bhd-ny.com",
 ]
 
 app.add_middleware(
